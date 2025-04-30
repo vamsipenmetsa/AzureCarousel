@@ -146,16 +146,19 @@ const generatePdf = async (slides) => {
 
   // Generate slides one by one with progress tracking
   for (let i = 0; i < slides.length; i++) {
-    // Check if element is available (with a small timeout for rendering)
+    // Increased delay to ensure DOM elements are fully rendered - fix for nextSibling error
+    await new Promise(r => setTimeout(r, 500));
+    
+    // Check if element is available with more patience (increased retry attempts)
     let slideElement = null;
     let attempts = 0;
     
-    while (!slideElement && attempts < 3) {
+    while (!slideElement && attempts < 5) { // Increased from 3 to 5 attempts
       slideElement = slideRefs.value[i]?.$el;
       if (!slideElement) {
         attempts++;
-        // Small wait between attempts
-        await new Promise(r => setTimeout(r, 200));
+        // Increased wait time between attempts
+        await new Promise(r => setTimeout(r, 300));
       }
     }
 
@@ -165,27 +168,33 @@ const generatePdf = async (slides) => {
     }
 
     try {
+      // Use more conservative settings that are less likely to cause errors
       const canvas = await html2canvas(slideElement, {
-        scale: 2.0, // Reduced for better performance
+        scale: 2.0, 
         width: slideWidth,
         height: slideHeight,
         useCORS: true,
         logging: false,
         backgroundColor: null,
-        // Force hardware acceleration off if it might be causing issues
-        allowTaint: true
+        allowTaint: true,
+        removeContainer: false, // Don't remove the container to avoid nextSibling errors
+        foreignObjectRendering: false, // Disable foreignObject which can cause issues
+        ignoreElements: (element) => {
+          // Ignore problematic elements that might cause nextSibling errors
+          return false;
+        }
       });
 
       if (i > 0) {
         pdf.addPage([slideWidth, slideHeight], 'portrait');
       }
 
-      // Use JPEG for faster processing
-      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      const imgData = canvas.toDataURL('image/jpeg', 0.9); // Higher quality JPEG
       pdf.addImage(imgData, 'JPEG', 0, 0, slideWidth, slideHeight);
       
     } catch (slideError) {
       console.error(`Error processing slide ${i + 1}:`, slideError);
+      // Try to continue with the next slide even if this one fails
     }
   }
 

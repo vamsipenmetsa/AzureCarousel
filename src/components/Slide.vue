@@ -205,9 +205,8 @@ function escapeHtml(unsafe: string) {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  /* Updated gradient to match the provided image - horizontal gradient from white to deep blue */
-  background: linear-gradient(to right, #ffffff 0%, #67b0e8 50%, #0078d4 100%);
-  /* Remove grid pattern for cleaner look */
+  /* Reverted to light blue gradient background as shown in the attached image */
+  background: linear-gradient(to right, #d6f0ff 0%, #c2e7ff 50%, #a8ddff 100%);
   background-size: 100% 100%;
   font-family: 'Futura', 'Century Gothic', sans-serif; 
   color: #1e1e3f;
@@ -397,9 +396,9 @@ function escapeHtml(unsafe: string) {
 .footer-icons-glassy-row {
   position: absolute;
   right: 60px;
-  bottom: 40px;
+  bottom: 50px; /* Increased from 40px to align with footer */
   display: flex;
-  gap: 18px;
+  gap: 24px; /* Increased gap between icons from 18px to 24px */
   z-index: 10;
 }
 
@@ -407,25 +406,22 @@ function escapeHtml(unsafe: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 60px; /* Increased from 48px */
+  height: 60px; /* Increased from 48px */
   border-radius: 50%;
   background: rgba(255,255,255,0.35);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  border: 1.5px solid rgba(255,255,255,0.5);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12); /* Enhanced shadow */
+  border: 2px solid rgba(255,255,255,0.6); /* Thicker border */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
 }
 
 .footer-icon-glass span {
-  font-size: 1.5em;
+  font-size: 1.8em; /* Increased from 1.5em */
   color: #003063;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.10));
-}
-
-.footer-icon-glass:hover {
-  box-shadow: 0 4px 16px rgba(0,120,212,0.18);
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.12));
+  padding: 4px; /* Added more internal padding */
 }
 
 /* --- Footer Styles (Common for Middle/Last) --- */
@@ -438,15 +434,19 @@ function escapeHtml(unsafe: string) {
   z-index: 5;
   color: #003063;
   padding: 10px; /* Added padding around the footer */
+  background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent background as in the image */
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
 }
 
 .profile-image-footer {
-  width: 75px; /* Larger profile image as in the screenshot */
-  height: 75px;
+  width: 85px; /* Even larger profile image */
+  height: 85px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.8);
-  margin-right: 18px; /* Increased from 15px */
+  margin-right: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Add subtle shadow */
 }
 
 .footer-text {
@@ -455,6 +455,17 @@ function escapeHtml(unsafe: string) {
   align-items: flex-start;
   text-align: left;
   padding: 2px 0; /* Added vertical padding */
+}
+
+.handle {
+  font-size: 1.4em; /* Larger text */
+  font-weight: bold;
+  color: #003063;
+}
+
+.website {
+  font-size: 1.1em; /* Larger text */
+  color: #0078d4;
 }
 
 /* --- Highlight Style --- */
