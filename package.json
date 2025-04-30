@@ -1,0 +1,24 @@
+{
+  "name": "devopsCarousel",
+  "version": "1.0.0",
+  "description": "A Vue.js application for generating PDF slides with a glassy finish and highlighted text.",
+  "main": "src/main.ts",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "vue": "^3.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.9.0",
+    "typescript": "^4.5.0",
+    "vite": "^2.6.0"
+  },
+  "keywords": [],
+  "author": "Vamsi Penmetsa",
+  "license": "MIT"
+}
