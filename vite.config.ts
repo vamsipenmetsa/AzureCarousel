@@ -14,6 +14,16 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    minify: 'terser', // Enable aggressive minification
+    assetsInlineLimit: 4096, // Inline small assets
+    cssCodeSplit: true, // Enable CSS code splitting
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['vue', 'jspdf', 'html2canvas']
+        }
+      }
+    }
   },
   resolve: {
     alias: {

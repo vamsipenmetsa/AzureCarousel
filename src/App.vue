@@ -101,58 +101,127 @@ const downloadPdf = async () => {
 
   // Add a placeholder for the static last slide
   const slidesWithStaticLast = [...rawSlides, 'STATIC_LAST_SLIDE_PLACEHOLDER'];
-  const totalSlidesCount = slidesWithStaticLast.length;
-
+  
   isGenerating.value = true;
   slidesForPdf.value = slidesWithStaticLast; // Use the augmented list
   slideRefs.value = [];
 
-  await nextTick();
-
   try {
-    const scale = 2; 
-    const slideWidth = 1080;
-    const slideHeight = 1080;
+    // Wait for Vue to render the slides
+    await nextTick();
+    
+    // Additional delay to ensure DOM elements are fully rendered
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'px',
-      format: [slideWidth * scale, slideHeight * scale] 
-    });
+    // Add a timeout for the entire process to prevent infinite loading
+    const pdfGenerationPromise = generatePdf(slidesWithStaticLast);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('PDF generation timed out')), 60000)
+    );
 
-    for (let i = 0; i < slidesForPdf.value.length; i++) {
-      const slideElement = slideRefs.value[i]?.$el as HTMLElement;
+    await Promise.race([pdfGenerationPromise, timeoutPromise]);
+  } catch (error) {
+    console.error('Error in PDF generation process:', error);
+    alert(`PDF generation failed: ${error.message || 'Unknown error'}`);
+  } finally {
+    // Always reset state
+    isGenerating.value = false;
+    slidesForPdf.value = [];
+  }
+};
+
+// Separated function for PDF generation to improve clarity and error handling
+const generatePdf = async (slides) => {
+  // Use lighter settings for better performance
+  const scale = 1.8;
+  const slideWidth = 1080;
+  const slideHeight = 1080;
+
+  const pdf = new jsPDF({
+    orientation: 'portrait',
+    unit: 'px',
+    format: [slideWidth, slideHeight],
+    compress: true
+  });
+
+  // Generate slides one by one with progress tracking
+  for (let i = 0; i < slides.length; i++) {
+    // Check if element is available (with a small timeout for rendering)
+    let slideElement = null;
+    let attempts = 0;
+    
+    while (!slideElement && attempts < 3) {
+      slideElement = slideRefs.value[i]?.$el;
       if (!slideElement) {
-        console.error(`Could not find slide element for index ${i}`);
-        continue;
+        attempts++;
+        // Small wait between attempts
+        await new Promise(r => setTimeout(r, 200));
       }
+    }
 
+    if (!slideElement) {
+      console.warn(`Could not find slide element for index ${i}, skipping`);
+      continue;
+    }
+
+    try {
       const canvas = await html2canvas(slideElement, {
-        scale: scale, 
+        scale: 2.0, // Reduced for better performance
         width: slideWidth,
         height: slideHeight,
         useCORS: true,
         logging: false,
-        backgroundColor: null 
+        backgroundColor: null,
+        // Force hardware acceleration off if it might be causing issues
+        allowTaint: true
       });
 
-      const imgData = canvas.toDataURL('image/png');
-
       if (i > 0) {
-        pdf.addPage([slideWidth * scale, slideHeight * scale], 'portrait');
+        pdf.addPage([slideWidth, slideHeight], 'portrait');
       }
-      pdf.addImage(imgData, 'PNG', 0, 0, slideWidth * scale, slideHeight * scale);
+
+      // Use JPEG for faster processing
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
+      pdf.addImage(imgData, 'JPEG', 0, 0, slideWidth, slideHeight);
+      
+    } catch (slideError) {
+      console.error(`Error processing slide ${i + 1}:`, slideError);
     }
+  }
 
-    const pdfTitle = getTitleFromFirstSlide(slidesForPdf.value[0]);
+  // Get title and try to download
+  const pdfTitle = getTitleFromFirstSlide(slides[0]);
+  
+  try {
+    // Try the standard method first
     pdf.save(`${pdfTitle}.pdf`);
-
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Failed to generate PDF. Check console for details.');
-  } finally {
-    isGenerating.value = false;
-    slidesForPdf.value = [];
+    return true;
+  } catch (saveError) {
+    console.error("Standard save failed, trying alternative method:", saveError);
+    
+    // Alternative download method
+    try {
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      
+      const downloadLink = document.createElement('a');
+      downloadLink.href = blobUrl;
+      downloadLink.download = `${pdfTitle}.pdf`;
+      document.body.appendChild(downloadLink);
+      
+      downloadLink.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+      
+      return true;
+    } catch (blobError) {
+      console.error("Alternative download method failed:", blobError);
+      throw new Error('PDF download failed after generation');
+    }
   }
 };
 

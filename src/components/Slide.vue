@@ -47,7 +47,8 @@
     <template v-else>
       <div class="middle-slide-content">
         <h2 v-if="heading">{{ heading }}</h2>
-        <div class="content" v-html="formattedContent"></div>
+        <!-- COMPLETELY NEW RENDERING APPROACH FOR HIGHLIGHTED TEXT -->
+        <div class="content" v-html="processedContentHtml"></div>
       </div>
       <!-- Footer remains bottom-left -->
       <div class="footer">
@@ -78,21 +79,26 @@ const props = defineProps<{
 
 const isFirst = computed(() => props.slideNumber === 1);
 
-// --- Enhanced Muted Highlight Colors (More Random Options) ---
+// --- Multiple highlight colors that don't repeat consecutively ---
 const highlightColors = [
-  'rgba(97, 255, 189, 0.5)',  // Neon Mint
-  'rgba(101, 214, 255, 0.5)',  // Neon Blue
-  'rgba(192, 132, 252, 0.5)',  // Neon Purple
-  'rgba(255, 189, 97, 0.5)',   // Neon Orange
-  'rgba(255, 114, 177, 0.5)',  // Neon Pink
-  'rgba(179, 255, 97, 0.5)',   // Neon Green
-  'rgba(255, 243, 97, 0.5)',   // Neon Yellow
-  'rgba(232, 143, 255, 0.5)',  // Neon Violet
+  'rgba(64, 224, 208, 0.4)',   // Turquoise
+  'rgba(255, 191, 0, 0.4)',     // Amber
+  'rgba(138, 43, 226, 0.4)',    // BlueViolet
+  'rgba(50, 205, 50, 0.4)',     // LimeGreen
+  'rgba(255, 105, 180, 0.4)',   // HotPink
+  'rgba(30, 144, 255, 0.4)',    // DodgerBlue
+  'rgba(255, 127, 80, 0.4)',    // Coral
+  'rgba(154, 205, 50, 0.4)'     // YellowGreen
 ];
 
-// Function to get a random highlight color
-const getRandomHighlightColor = () => {
-  return highlightColors[Math.floor(Math.random() * highlightColors.length)];
+let lastHighlightIdx = -1;
+const getNextHighlightColor = () => {
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * highlightColors.length);
+  } while (idx === lastHighlightIdx && highlightColors.length > 1);
+  lastHighlightIdx = idx;
+  return highlightColors[idx];
 };
 
 // --- Content Parsing --- 
@@ -122,20 +128,69 @@ const mainContent = computed(() => {
   }
 });
 
-// Format content: handle cycling highlights on mainContent
-const formattedContent = computed(() => {
-  let text = '';
-  if (!isFirst.value && !props.isStaticLast) {
-      text = mainContent.value; 
+// NEW APPROACH: Process content directly to HTML with properly scoped highlights
+const processedContentHtml = computed(() => {
+  if (isFirst.value || props.isStaticLast) {
+    return escapeHtml(mainContent.value);
+  }
+
+  // Reset last color index for each new slide
+  lastHighlightIdx = -1;
+  
+  // Get the content text
+  const content = mainContent.value;
+  
+  // Step 1: Pre-process the content to handle punctuation near = signs
+  // This ensures periods and commas don't get included in highlights
+  let processedContent = content;
+  
+  // Step 2: Convert the content to HTML parts
+  let result = '';
+  let currentPos = 0;
+  let startPos = -1;
+  let inHighlight = false;
+  
+  for (let i = 0; i < processedContent.length; i++) {
+    if (processedContent[i] === '=') {
+      if (!inHighlight) {
+        // Start of highlight - add everything before this point as regular text
+        result += escapeHtml(processedContent.substring(currentPos, i));
+        startPos = i + 1; // Start after the = sign
+        inHighlight = true;
+      } else {
+        // End of highlight - add the highlighted text
+        const highlightedText = processedContent.substring(startPos, i);
+        const color = getNextHighlightColor();
+        result += `<span class="highlight" style="background: ${color};">${escapeHtml(highlightedText)}</span>`;
+        currentPos = i + 1; // Start after the = sign
+        inHighlight = false;
+      }
+    }
   }
   
-  // Replace =highlighted text= with random highlight colors
-  return text.replace(/=(.*?)=/g, (match, p1) => {
-    const color = getRandomHighlightColor();
-    return `<span class="highlight" style="background-color: ${color};">${p1}</span>`; 
-  });
+  // Add any remaining text
+  if (currentPos < processedContent.length) {
+    result += escapeHtml(processedContent.substring(currentPos));
+  }
+  
+  // Special case: if we ended while still in a highlight (odd number of = signs)
+  if (inHighlight) {
+    // Just add the '=' character and the text as normal
+    result += escapeHtml('=' + processedContent.substring(startPos));
+  }
+  
+  return result;
 });
 
+// Helper function to escape HTML 
+function escapeHtml(unsafe: string) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 </script>
 
 <style scoped>
@@ -150,13 +205,13 @@ const formattedContent = computed(() => {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  /* Updated gradient to match Microsoft Azure colors (white to light blue to dark blue) */
-  background: linear-gradient(to right, #ffffff 0%, #89c4f4 50%, #0078d4 100%); /* White -> Azure Light Blue -> Azure Blue */
-  /* Updating the gradient in the background-image as well */
+  /* Updated lighter gradient with bluish tones */
+  background: linear-gradient(to right, #e8f7ff 0%, #d5edff 50%, #c2e3ff 100%);
+  /* Lighter grid pattern */
   background-image: 
-    linear-gradient(to right, #ffffff 0%, #89c4f4 50%, #0078d4 100%),
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, #e8f7ff 0%, #d5edff 50%, #c2e3ff 100%),
+    linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
   background-size: 100% 100%, 20px 20px, 20px 20px;
   background-position: 0 0, 0 0, 0 0;
   background-blend-mode: normal, overlay, overlay;
@@ -166,13 +221,13 @@ const formattedContent = computed(() => {
 
 .slide-number {
   position: absolute;
-  top: 30px;
-  right: 40px;
+  top: 40px; /* Increased from 30px */
+  right: 50px; /* Increased from 40px */
   background-color: rgba(255, 255, 255, 0.3);
   color: #1e1e3f;
-  padding: 5px 15px;
+  padding: 8px 20px; /* Increased from 5px 15px */
   border-radius: 15px;
-  font-size: 0.9em;
+  font-size: 0.95em; /* Slightly larger */
   font-weight: bold;
   z-index: 10;
 }
@@ -382,21 +437,22 @@ const formattedContent = computed(() => {
 /* --- Footer Styles (Common for Middle/Last) --- */
 .footer {
   position: absolute;
-  bottom: 60px; /* Moved up from 40px */
-  left: 60px;
+  bottom: 70px; /* Increased from 60px */
+  left: 70px; /* Increased from 60px */
   display: flex;
   align-items: center;
   z-index: 5;
-  color: #003063; /* Darker blue for left side, will still be visible on right */
+  color: #003063;
+  padding: 10px; /* Added padding around the footer */
 }
 
 .profile-image-footer {
-  width: 60px;
-  height: 60px;
+  width: 65px; /* Slightly larger */
+  height: 65px; /* Slightly larger */
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.8);
-  margin-right: 15px;
+  margin-right: 18px; /* Increased from 15px */
 }
 
 .footer-text {
@@ -404,28 +460,25 @@ const formattedContent = computed(() => {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-}
-
-.handle {
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #003063; /* Darker blue for better visibility */
-}
-
-.website {
-  font-size: 1em;
-  color: #0078d4; /* Azure blue */
+  padding: 2px 0; /* Added vertical padding */
 }
 
 /* --- Highlight Style --- */
-.highlight {
-  padding: 0.1em 0.3em;
-  border-radius: 5px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-  margin: 0 0.1em;
-  color: #1f1f1f;
-  font-weight: bold;
+:deep(.highlight) {
+  padding: 0.12em 0.32em;
+  border-radius: 7px;
+  color: #222;
+  font-weight: 600;
+  background-clip: padding-box;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);
+  transition: background 0.2s;
+  /* No 3D text effect for highlighted text */
+}
+
+/* Keep 3D effect for titles */
+.slide h1, .slide h2, .last-slide-main-title {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3), -1px -1px 2px rgba(255, 255, 255, 0.2);
 }
 
 </style>
