@@ -2,8 +2,8 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 // Get the repository name to use as base path for GitHub Pages
-// This will be devopsCarousel if your repository is named that way
-const BASE_PATH = process.env.NODE_ENV === 'production' ? '/devopsCarousel/' : '/';
+// This will be AzureCarousel if your repository is named that way
+const BASE_PATH = process.env.NODE_ENV === 'production' ? '/AzureCarousel/' : '/';
 
 export default defineConfig({
   plugins: [vue()],
