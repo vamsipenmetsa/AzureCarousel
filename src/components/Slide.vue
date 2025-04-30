@@ -81,14 +81,14 @@ const isFirst = computed(() => props.slideNumber === 1);
 
 // --- Multiple highlight colors that don't repeat consecutively ---
 const highlightColors = [
+  'rgba(80, 200, 120, 0.4)',   // Light green (primary color as shown in image)
   'rgba(64, 224, 208, 0.4)',   // Turquoise
-  'rgba(255, 191, 0, 0.4)',     // Amber
-  'rgba(138, 43, 226, 0.4)',    // BlueViolet
-  'rgba(50, 205, 50, 0.4)',     // LimeGreen
-  'rgba(255, 105, 180, 0.4)',   // HotPink
-  'rgba(30, 144, 255, 0.4)',    // DodgerBlue
-  'rgba(255, 127, 80, 0.4)',    // Coral
-  'rgba(154, 205, 50, 0.4)'     // YellowGreen
+  'rgba(255, 191, 0, 0.4)',    // Amber
+  'rgba(138, 43, 226, 0.4)',   // BlueViolet
+  'rgba(50, 205, 50, 0.4)',    // LimeGreen
+  'rgba(30, 144, 255, 0.4)',   // DodgerBlue
+  'rgba(255, 127, 80, 0.4)',   // Coral
+  'rgba(154, 205, 50, 0.4)'    // YellowGreen
 ];
 
 let lastHighlightIdx = -1;
@@ -205,29 +205,23 @@ function escapeHtml(unsafe: string) {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  /* Updated lighter gradient with bluish tones */
-  background: linear-gradient(to right, #e8f7ff 0%, #d5edff 50%, #c2e3ff 100%);
-  /* Lighter grid pattern */
-  background-image: 
-    linear-gradient(to right, #e8f7ff 0%, #d5edff 50%, #c2e3ff 100%),
-    linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
-  background-size: 100% 100%, 20px 20px, 20px 20px;
-  background-position: 0 0, 0 0, 0 0;
-  background-blend-mode: normal, overlay, overlay;
+  /* Updated gradient to match the provided image - horizontal gradient from white to deep blue */
+  background: linear-gradient(to right, #ffffff 0%, #67b0e8 50%, #0078d4 100%);
+  /* Remove grid pattern for cleaner look */
+  background-size: 100% 100%;
   font-family: 'Futura', 'Century Gothic', sans-serif; 
-  color: #1e1e3f; /* Adjusted for better contrast on new background */
+  color: #1e1e3f;
 }
 
 .slide-number {
   position: absolute;
-  top: 40px; /* Increased from 30px */
-  right: 50px; /* Increased from 40px */
+  top: 50px; /* Consistent padding with footer */
+  right: 60px; 
   background-color: rgba(255, 255, 255, 0.3);
   color: #1e1e3f;
-  padding: 8px 20px; /* Increased from 5px 15px */
+  padding: 8px 20px;
   border-radius: 15px;
-  font-size: 0.95em; /* Slightly larger */
+  font-size: 0.95em;
   font-weight: bold;
   z-index: 10;
 }
@@ -437,8 +431,8 @@ function escapeHtml(unsafe: string) {
 /* --- Footer Styles (Common for Middle/Last) --- */
 .footer {
   position: absolute;
-  bottom: 70px; /* Increased from 60px */
-  left: 70px; /* Increased from 60px */
+  bottom: 50px; /* Consistent padding with header */
+  left: 60px;
   display: flex;
   align-items: center;
   z-index: 5;
@@ -447,8 +441,8 @@ function escapeHtml(unsafe: string) {
 }
 
 .profile-image-footer {
-  width: 65px; /* Slightly larger */
-  height: 65px; /* Slightly larger */
+  width: 75px; /* Larger profile image as in the screenshot */
+  height: 75px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.8);
