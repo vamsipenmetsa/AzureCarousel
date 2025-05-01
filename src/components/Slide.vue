@@ -23,7 +23,7 @@
           <p class="last-slide-small-title">Enjoyed it?</p>
           <h2 class="last-slide-main-title">Nail Your Azure Concepts</h2>
           <p class="last-slide-body">
-            For more cloud insights and Azure best practices, follow me on LinkedIn @VamsiPenmetsa.
+            For more cloud insights and Azure best practices, follow me on LinkedIn <span class="highlighted-handle">@VamsiPenmetsa</span>.
           </p>
           <button class="last-slide-button">Any Questions?</button>
         </div>
@@ -433,19 +433,20 @@ function escapeHtml(unsafe: string) {
   align-items: center;
   z-index: 5;
   color: #003063;
-  padding: 10px; /* Added padding around the footer */
+  padding: 12px 15px; /* Adjusted padding for better spacing */
   background-color: rgba(255, 255, 255, 0.25); /* Semi-transparent background as in the image */
-  border-radius: 12px;
+  border-radius: 16px; /* Slightly more rounded corners */
   backdrop-filter: blur(5px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08); /* Subtle shadow for depth */
 }
 
 .profile-image-footer {
-  width: 85px; /* Even larger profile image */
-  height: 85px;
+  width: 90px; /* Increased size */
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.8);
-  margin-right: 18px;
+  margin-right: 20px; /* More space between image and text */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Add subtle shadow */
 }
 
@@ -453,18 +454,21 @@ function escapeHtml(unsafe: string) {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center; /* Center vertically */
   text-align: left;
-  padding: 2px 0; /* Added vertical padding */
+  padding: 3px 0; /* Added vertical padding */
+  height: 90px; /* Match height with profile image for perfect alignment */
 }
 
 .handle {
-  font-size: 1.4em; /* Larger text */
+  font-size: 1.6em; /* Larger text */
   font-weight: bold;
   color: #003063;
+  margin-bottom: 5px; /* Space between handle and website */
 }
 
 .website {
-  font-size: 1.1em; /* Larger text */
+  font-size: 1.2em; /* Larger text */
   color: #0078d4;
 }
 
@@ -472,13 +476,22 @@ function escapeHtml(unsafe: string) {
 :deep(.highlight) {
   padding: 0.12em 0.32em;
   border-radius: 7px;
-  color: #222;
-  font-weight: 600;
+  color: inherit; /* Use the same color as the parent */
+  font-weight: inherit; /* Keep the same font weight as the surrounding text */
+  font-size: inherit; /* Keep the same font size as the surrounding text */
   background-clip: padding-box;
   border: 1px solid rgba(0,0,0,0.04);
   box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);
   transition: background 0.2s;
-  /* No 3D text effect for highlighted text */
+}
+
+/* Add styling for the highlighted handle in the last slide */
+.highlighted-handle {
+  background-color: rgba(80, 200, 120, 0.4); /* Light green color from our palette */
+  padding: 0.12em 0.32em;
+  border-radius: 7px;
+  font-weight: bold;
+  color: #003063;
 }
 
 /* Keep 3D effect for titles */
