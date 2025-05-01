@@ -134,51 +134,51 @@ const processedContentHtml = computed(() => {
     return escapeHtml(mainContent.value);
   }
 
-  // Reset last color index for each new slide
-  lastHighlightIdx = -1;
-  
-  // Get the content text
+  lastHighlightIdx = -1; // Reset color index
   const content = mainContent.value;
-  
-  // Step 1: Pre-process the content to handle punctuation near = signs
-  // This ensures periods and commas don't get included in highlights
-  let processedContent = content;
-  
-  // Step 2: Convert the content to HTML parts
   let result = '';
   let currentPos = 0;
-  let startPos = -1;
   let inHighlight = false;
-  
-  for (let i = 0; i < processedContent.length; i++) {
-    if (processedContent[i] === '=') {
+  let highlightStart = -1;
+
+  for (let i = 0; i < content.length; i++) {
+    if (content[i] === '=') {
       if (!inHighlight) {
-        // Start of highlight - add everything before this point as regular text
-        result += escapeHtml(processedContent.substring(currentPos, i));
-        startPos = i + 1; // Start after the = sign
+        // Potential start of highlight
+        // Append text before this '='
+        result += escapeHtml(content.substring(currentPos, i));
+        highlightStart = i + 1; // Mark position after '='
         inHighlight = true;
+        currentPos = i + 1; // Move current position past '='
       } else {
-        // End of highlight - add the highlighted text
-        const highlightedText = processedContent.substring(startPos, i);
-        const color = getNextHighlightColor();
-        result += `<span class="highlight" style="background: ${color};">${escapeHtml(highlightedText)}</span>`;
-        currentPos = i + 1; // Start after the = sign
+        // End of highlight
+        const highlightedText = content.substring(highlightStart, i);
+        if (highlightedText.trim() !== '') {
+          const color = getNextHighlightColor();
+          result += `<span class="highlight" style="background: ${color};">${escapeHtml(highlightedText)}</span>`;
+        } else {
+          // Handle empty highlight like '==' -> just output '=='
+          result += '==';
+        }
         inHighlight = false;
+        currentPos = i + 1; // Move current position past '='
       }
     }
   }
-  
-  // Add any remaining text
-  if (currentPos < processedContent.length) {
-    result += escapeHtml(processedContent.substring(currentPos));
+
+  // Append any remaining text after the last '=' or if no '=' were found
+  if (currentPos < content.length) {
+    // If we ended inside a highlight (unmatched '='), treat the last '=' and subsequent text as normal text
+    if (inHighlight) {
+       result += escapeHtml('=' + content.substring(highlightStart));
+    } else {
+       result += escapeHtml(content.substring(currentPos));
+    }
+  } else if (inHighlight) {
+      // Handle case where '=' is the very last character
+      result += escapeHtml('=');
   }
-  
-  // Special case: if we ended while still in a highlight (odd number of = signs)
-  if (inHighlight) {
-    // Just add the '=' character and the text as normal
-    result += escapeHtml('=' + processedContent.substring(startPos));
-  }
-  
+
   return result;
 });
 
