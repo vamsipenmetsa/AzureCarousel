@@ -9,7 +9,7 @@
         <img src="/vamsipenmetsa.png" alt="Profile" class="profile-image-top">
         <div class="content-wrapper-first glassy">
           <h1>{{ title }}</h1>
-          <p class="subtitle">Azure Concepts by Vamsi Penmetsa</p> 
+          <p class="subtitle">Azure Concepts by <span class="highlighted-handle">Vamsi Penmetsa</span></p> 
         </div>
         <!-- Moved button to bottom right -->
         <button class="discover-button">Discover more &rarr;</button>
